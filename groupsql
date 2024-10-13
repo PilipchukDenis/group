@@ -1,0 +1,57 @@
+-- фото задание 
+
+SELECT title, name_author, name_genre, price, amount
+FROM book
+    INNER JOIN author ON book.author_id = author.author_id
+    INNER JOIN genre ON book.genre_id = genre.genre_id
+    where genre_id in (select genre_id
+                              FROM book
+                              GROUP BY genre_id
+                              HAVING sum_amount = 
+                                              (SELECT sum(amount) AS sum_amount
+                                                FROM book
+                                                GROUP BY genre_id
+                                                ORDER BY sum_amount DESC
+                                                LIMIT 1)) 
+ ORDER BY title ASC;
+
+
+
+
+/* Подсчитать количество групп, в которые вступил каждый пользователь. */
+  SELECT users.lastname, users.firstname, COUNT(community_id) AS communities_count
+  FROM users 
+  JOIN users_communities ON users.id = users_communities.user_id
+GROUP BY users.id
+ORDER BY users.lastname;
+
+
+
+
+/* Подсчитать количество пользователей в каждом сообществе. */
+SELECT communities.name AS community, COUNT(user_id) AS users_count
+    FROM communities
+    JOIN users_communities ON communities.id = users_communities.community_id
+GROUP BY communities.id
+ORDER BY communities.name;
+
+
+
+
+
+/* Определить кто больше поставил лайков (всего): мужчины или женщины. */
+sELECT profiles.gender AS most_likes_given_by_gender
+FROM likes 
+ JOIN profiles ON likes.user_id = profiles.user_id
+ GROUP BY profiles.gender
+ORDER BY COUNT(likes.id) DESC
+LIMIT 1;
+
+
+
+-- Подсчитать общее количество лайков, которые получили пользователи младше 18 лет..
+SELECT COUNT(likes.id) AS likes_to_youngs
+ FROM likes
+ JOIN media ON likes.media_id = media.id
+JOIN profiles ON media.user_id = profiles.user_id
+WHERE profiles.birthday > DATE_ADD(CURDATE(), INTERVAL -18 YEAR);
